@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="public/assets/bootstrap.min.css">
 </head>
 <body>
+<?php include "views/header.php"; ?>
 <div class="container">
     <h2>Đăng ký học phần</h2>
     <div class="mb-3">
@@ -24,14 +25,16 @@
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($list as $hp) { ?>
+            <?php foreach ($list as $hp) { 
+                $soLuong = isset($hp['SoLuong']) ? $hp['SoLuong'] : 10;
+            ?>
                 <tr>
                     <td><?= $hp['MaHP'] ?></td>
                     <td><?= $hp['TenHP'] ?></td>
                     <td><?= $hp['SoTinChi'] ?></td>
-                    <td><?= $hp['SoLuong'] ?></td>
+                    <td><?= $soLuong ?></td>
                     <td>
-                        <?php if ($hp['SoLuong'] > 0) { ?>
+                        <?php if ($soLuong > 0) { ?>
                             <a href="?page=dangky&action=register&MaHP=<?= $hp['MaHP'] ?>" class="btn btn-success btn-sm">Đăng ký</a>
                         <?php } else { ?>
                             <button class="btn btn-secondary btn-sm" disabled>Hết chỗ</button>

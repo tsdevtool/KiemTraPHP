@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="public/assets/bootstrap.min.css">
 </head>
 <body>
+<?php include "views/header.php"; ?>
 <div class="container">
     <h2>Danh sách học phần</h2>
     <div class="mb-3">
@@ -29,7 +30,7 @@
                     <td><?= $hp['MaHP'] ?></td>
                     <td><?= $hp['TenHP'] ?></td>
                     <td><?= $hp['SoTinChi'] ?></td>
-                    <td><?= $hp['SoLuong'] ?></td>
+                    <td><?= isset($hp['SoLuong']) ? $hp['SoLuong'] : 10 ?></td>
                     <td>
                         <div class="btn-group">
                             <a href="?page=hocphan&action=edit&MaHP=<?= $hp['MaHP'] ?>" class="btn btn-warning btn-sm">Sửa</a>

@@ -1,20 +1,3 @@
-<?php
-require_once "../../config/Database.php";
-require_once "../../models/Auth.php";
-
-$db = (new Database())->getConnection();
-$auth = new Auth($db);
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $maSV = $_POST['MaSV'];
-    if ($auth->login($maSV)) {
-        header("Location: ../../public/index.php");
-    } else {
-        $error = "Mã sinh viên không hợp lệ!";
-    }
-}
-?>
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -36,11 +19,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <div class="form-group">
                             <label>Mã Sinh Viên:</label>
                             <input type="text" name="MaSV" class="form-control" required>
+                            <small class="form-text text-muted">Sử dụng mã sinh viên (ví dụ: 0123456789)</small>
                         </div>
                         <div class="form-group mt-3">
                             <button type="submit" class="btn btn-primary btn-block">Đăng nhập</button>
                         </div>
                     </form>
+                </div>
+                <div class="card-footer">
+                    <a href="?page=sinhvien&action=index">Quay lại trang chủ</a>
                 </div>
             </div>
         </div>

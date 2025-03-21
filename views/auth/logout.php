@@ -1,6 +1,5 @@
 <?php
-require_once "models/Auth.php";
-
-$auth = new Auth(null);
-$auth->logout();
+// Chuyển hướng đến action logout của AuthController
+header("Location: ?page=auth&action=logout");
+exit;
 ?>

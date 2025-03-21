@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="public/assets/bootstrap.min.css">
 </head>
 <body>
+<?php include "views/header.php"; ?>
 <div class="container">
     <h2>Học phần đã đăng ký</h2>
     <div class="mb-3">

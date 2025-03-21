@@ -16,55 +16,62 @@ class DangKy {
         $this->conn->beginTransaction();
         
         try {
-            // Check if course is still available
-            $stmt = $this->conn->prepare("SELECT SoLuong FROM HocPhan WHERE MaHP = ? FOR UPDATE");
-            $stmt->execute([$maHP]);
-            $soLuong = $stmt->fetchColumn();
+            // Check if SoLuong column exists
+            $stmt = $this->conn->prepare("SHOW COLUMNS FROM HocPhan LIKE 'SoLuong'");
+            $stmt->execute();
+            $column_exists = $stmt->rowCount() > 0;
             
-            if ($soLuong > 0) {
-                // Check if student has already registered for this course
-                $stmt = $this->conn->prepare("
-                    SELECT COUNT(*) FROM DangKy dk 
-                    JOIN ChiTietDangKy ct ON dk.MaDK = ct.MaDK 
-                    WHERE dk.MaSV = ? AND ct.MaHP = ?
-                ");
-                $stmt->execute([$maSV, $maHP]);
-                $alreadyRegistered = $stmt->fetchColumn();
+            if ($column_exists) {
+                // Check if course is still available
+                $stmt = $this->conn->prepare("SELECT SoLuong FROM HocPhan WHERE MaHP = ? FOR UPDATE");
+                $stmt->execute([$maHP]);
+                $soLuong = $stmt->fetchColumn();
                 
-                if ($alreadyRegistered > 0) {
+                if ($soLuong <= 0) {
                     $this->conn->rollBack();
-                    return false; // Already registered
+                    return false; // No slots available
                 }
                 
                 // Decrease available slots
                 $stmt = $this->conn->prepare("UPDATE HocPhan SET SoLuong = SoLuong - 1 WHERE MaHP = ?");
                 $stmt->execute([$maHP]);
-        
-                // Check if student already has a registration entry
-                $stmt = $this->conn->prepare("SELECT MaDK FROM DangKy WHERE MaSV = ? ORDER BY MaDK DESC LIMIT 1");
-                $stmt->execute([$maSV]);
-                $existingDK = $stmt->fetch();
-                
-                if ($existingDK) {
-                    // Use existing registration
-                    $maDK = $existingDK['MaDK'];
-                } else {
-                    // Create new registration entry
-                    $stmt = $this->conn->prepare("INSERT INTO DangKy (NgayDK, MaSV) VALUES (NOW(), ?)");
-                    $stmt->execute([$maSV]);
-                    $maDK = $this->conn->lastInsertId();
-                }
-                
-                // Add course to registration details
-                $stmt = $this->conn->prepare("INSERT INTO ChiTietDangKy (MaDK, MaHP) VALUES (?, ?)");
-                $result = $stmt->execute([$maDK, $maHP]);
-                
-                $this->conn->commit();
-                return $result;
             }
             
-            $this->conn->rollBack();
-            return false;
+            // Check if student has already registered for this course
+            $stmt = $this->conn->prepare("
+                SELECT COUNT(*) FROM DangKy dk 
+                JOIN ChiTietDangKy ct ON dk.MaDK = ct.MaDK 
+                WHERE dk.MaSV = ? AND ct.MaHP = ?
+            ");
+            $stmt->execute([$maSV, $maHP]);
+            $alreadyRegistered = $stmt->fetchColumn();
+            
+            if ($alreadyRegistered > 0) {
+                $this->conn->rollBack();
+                return false; // Already registered
+            }
+            
+            // Check if student already has a registration entry
+            $stmt = $this->conn->prepare("SELECT MaDK FROM DangKy WHERE MaSV = ? ORDER BY MaDK DESC LIMIT 1");
+            $stmt->execute([$maSV]);
+            $existingDK = $stmt->fetch();
+            
+            if ($existingDK) {
+                // Use existing registration
+                $maDK = $existingDK['MaDK'];
+            } else {
+                // Create new registration entry
+                $stmt = $this->conn->prepare("INSERT INTO DangKy (NgayDK, MaSV) VALUES (NOW(), ?)");
+                $stmt->execute([$maSV]);
+                $maDK = $this->conn->lastInsertId();
+            }
+            
+            // Add course to registration details
+            $stmt = $this->conn->prepare("INSERT INTO ChiTietDangKy (MaDK, MaHP) VALUES (?, ?)");
+            $result = $stmt->execute([$maDK, $maHP]);
+            
+            $this->conn->commit();
+            return $result;
         } catch (Exception $e) {
             $this->conn->rollBack();
             return false;

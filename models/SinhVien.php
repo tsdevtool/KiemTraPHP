@@ -37,7 +37,33 @@ class SinhVien {
     }
 
     public function delete($maSV) {
-        $stmt = $this->conn->prepare("DELETE FROM {$this->table} WHERE MaSV = ?");
-        return $stmt->execute([$maSV]);
+        try {
+            // Bắt đầu transaction để đảm bảo tính toàn vẹn dữ liệu
+            $this->conn->beginTransaction();
+            
+            // Xóa các chi tiết đăng ký liên quan đến sinh viên này
+            $stmt = $this->conn->prepare("
+                DELETE ct FROM ChiTietDangKy ct 
+                JOIN DangKy dk ON ct.MaDK = dk.MaDK 
+                WHERE dk.MaSV = ?
+            ");
+            $stmt->execute([$maSV]);
+            
+            // Xóa các đăng ký của sinh viên
+            $stmt = $this->conn->prepare("DELETE FROM DangKy WHERE MaSV = ?");
+            $stmt->execute([$maSV]);
+            
+            // Sau khi đã xóa các khóa ngoại, xóa sinh viên
+            $stmt = $this->conn->prepare("DELETE FROM {$this->table} WHERE MaSV = ?");
+            $stmt->execute([$maSV]);
+            
+            // Commit transaction
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            // Rollback nếu có lỗi
+            $this->conn->rollBack();
+            return false;
+        }
     }
 }

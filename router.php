@@ -1,4 +1,7 @@
 <?php
+// Include initialization file
+require_once "init.php";
+
 require_once "config/Database.php";
 
 // Default route is home/index

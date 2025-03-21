@@ -89,4 +89,15 @@ class DangKy {
         $stmt->execute([$maSV]);
         return $stmt->fetchAll();
     }
+    
+    public function findByMaHP($maHP) {
+        $stmt = $this->conn->prepare("
+            SELECT DK.MaDK 
+            FROM DangKy DK
+            JOIN ChiTietDangKy CT ON DK.MaDK = CT.MaDK
+            WHERE CT.MaHP = ?
+        ");
+        $stmt->execute([$maHP]);
+        return $stmt->fetchAll();
+    }
 }

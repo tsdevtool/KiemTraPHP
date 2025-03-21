@@ -1,9 +1,11 @@
 <?php
+// No need to start session here as it's done in init.php which is included by router.php
+
 require_once "config/Database.php";
 require_once "models/DangKy.php";
 require_once "models/HocPhan.php";
 
-session_start();
+// Check if user is logged in
 if (!isset($_SESSION['MaSV'])) {
     header("Location: ?page=auth&action=login");
     exit;
